@@ -178,3 +178,10 @@ pyrightconfig.json
 # additional ignore
 data/
 data2/
+Temp_Data/
+
+# Data Checking files
+Code_Practice.ipynb
+Crowling_Data.ipynb
+Data_Preprocessing.ipynb
+DataCheck.ipynb
