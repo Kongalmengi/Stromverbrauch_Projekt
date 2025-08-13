@@ -183,5 +183,7 @@ Temp_Data/
 # Data Checking files
 Code_Practice.ipynb
 Crowling_Data.ipynb
-Data_Preprocessing.ipynb
-DataCheck.ipynb
+Data_Check.ipynb
+Data_Prep1.ipynb
+Data_Prep2.ipynb
+Data_Prep3.ipynb
