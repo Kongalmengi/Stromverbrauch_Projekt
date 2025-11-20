@@ -176,8 +176,8 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python
 
 # additional ignore
-data/
-data2/
+Data/
+Data2/
 Temp_Data/
 
 # Data Checking files
@@ -191,3 +191,21 @@ Data_Prep4.ipynb
 Data_Prep5.ipynb
 Data_Prep6.ipynb
 Data_Prep7.ipynb
+Additional_Prep1.ipynb
+
+# EDA files
+EDA.ipynb
+EDA2.ipynb
+
+# Modeling files
+Modeling1.ipynb
+Modeling2.ipynb
+Modeling3.ipynb
+
+# Practice files
+StPractice.py
+
+# data ignore
+Data3/.ipynb_checkpoints
+Data3/DE_District.csv
+Data3/DE_gdf.json
