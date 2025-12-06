@@ -138,14 +138,14 @@ def load_BW_Combined_df(TBD_df):
 # Bundesland_Indust
 @st.cache_data
 def load_BW_Indust_demmo():
-    indu_total_df = pd.read_csv('Data3\DemoData\Bundesland_Indust.csv')
+    indu_total_df = pd.read_csv('Data3/DemoData/Bundesland_Indust.csv')
     return indu_total_df
 
 
 # IndustrieData
 @st.cache_data
 def load_BW_raw_Indust():
-    Indust_df = pd.read_csv('Data3\DemoData\IndustrieData.csv')
+    Indust_df = pd.read_csv('Data3/DemoData/IndustrieData.csv')
     return Indust_df
 
 
