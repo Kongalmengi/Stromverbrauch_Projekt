@@ -21,7 +21,7 @@ from utils.Demo_funcs import divide_Jahr, Gopp_corr_umsatz_dfs, Gopp_corr_bes_df
 st.set_page_config(
     page_title='Projekt Overview',
     page_icon=':bar_chart:',
-    layout='wide',
+    layout='wide'
 )
 
 
