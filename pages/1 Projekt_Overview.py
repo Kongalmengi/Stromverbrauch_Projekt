@@ -14,6 +14,8 @@ from utils.load_files import load_scaler, load_Ridge_model, load_LinearRegressio
 # Demo_funcs
 from utils.Demo_funcs import divide_Jahr, Gopp_corr_umsatz_dfs, Gopp_corr_bes_dfs, umsatz_corr_dfs_for_Vis, bes_corr_dfs_for_Vis, colormaps_for_Vis, make_subset, make_pred_subset, make_subset_2, make_corr_mat, make_vif, test_gesamtmodell, kfold_result
 
+# model eveluations
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
 
@@ -1022,16 +1024,48 @@ with main_tabs[1]:
 
         st.space(size='small')
 
+
+        # evalution for Visualization
+        y_test, y_pred, residuals, importance_df, eval_results_df, res_df = test_gesamtmodell(combined_df, scaler_for_normal_reg, normal_ridge_model)
+
+
         st.markdown(
             """
-            #### i) Feature-Importance
+            #### i) Modellgütemaße
             """
         )
 
         st.space(size='small')
 
-        # evalution for Visualization
-        y_test, y_pred, residuals, importance_df, eval_results_df, res_df = test_gesamtmodell(combined_df, scaler_for_normal_reg, normal_ridge_model)
+        # Evaluations of the Model
+        r2_gesamtmodell = r2_score(y_test, y_pred)
+        mae_gesamtmodell = mean_absolute_error(y_test, y_pred)
+        rmse_gesamtmodell = np.sqrt(mean_squared_error(y_test, y_pred))
+
+        # Evaluation DataFrame
+
+        container_for_gesamteval = st.container(border=True, horizontal_alignment='center', vertical_alignment='center')
+        with container_for_gesamteval:
+            st.write('Table1. Modellgütemaße')
+            # DataFrame of the Evaluations
+            eval_score_df = pd.DataFrame(
+                {
+                    'Maß':['R²', 'MAE', 'RMSE', 'alpha'],
+                    'Wert':[r2_gesamtmodell, mae_gesamtmodell, rmse_gesamtmodell, 10]
+                }
+            )
+
+            st.dataframe(eval_score_df, width=300, hide_index=True)
+
+        st.space(size='small')
+
+        st.markdown(
+            """
+            #### ii) Feature-Importance
+            """
+        )
+
+        st.space(size='small')
 
         # Visualization
         fig_importance = px.bar(
@@ -1048,7 +1082,7 @@ with main_tabs[1]:
 
         st.markdown(
             """
-            ### ii) Residuenverteilung von Prognose- und Istwerten - Histogramm
+            ### iii) Residuenverteilung von Prognose- und Istwerten - Histogramm
             """
         )
 
@@ -1069,7 +1103,7 @@ with main_tabs[1]:
 
         st.markdown(
             """
-            ### iii) Residuenverteilung von Prognose- und Istwerten - Streudiagramm
+            ### iv) Residuenverteilung von Prognose- und Istwerten - Streudiagramm
             """
         )
 
@@ -1090,7 +1124,7 @@ with main_tabs[1]:
 
         st.markdown(
             """
-            ### iv) Verteilung von Ist- und Prognosewerten - Streudiagramm
+            ### v) Verteilung von Ist- und Prognosewerten - Streudiagramm
             """
         )
 
