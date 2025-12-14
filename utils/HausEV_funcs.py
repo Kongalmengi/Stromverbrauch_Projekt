@@ -3,7 +3,7 @@ import pandas as pd
 import geopandas as gpd
 
 
-# ---인구 데이터프레임---
+# ---(DataFrame : Bevölkerung)---
 
 # temp_pred_Bev_df - Step1
 def temp_pred_Bev_base(BW_pred_Bev_df, Grp_1, Grp_2, Grp_3, EW_inc_rate, Grp_val_0):

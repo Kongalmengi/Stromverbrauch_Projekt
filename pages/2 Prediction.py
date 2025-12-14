@@ -166,7 +166,7 @@ def main():
             st.write('Regionseinstellungen - Gruppe 1')
             # Select Group1
             Grp_1 = st.multiselect('Regionen für Gruppe 1 auswählen', all_Verband, key='group1')
-            # Group_1에 들어간 값은 Group_2, Group_3에서 제거
+            # Exclude Group1 selections from Group2 and Group3
             st.session_state['group2'] = [
                 k for k in st.session_state['group2']
                 if k not in st.session_state['group1']
@@ -194,7 +194,7 @@ def main():
 
             # Group2 Settings
             st.write('Regionseinstellungen - Gruppe 2')
-            # Group_2의 선택지는 Group_1, Group_3에 이미 들어간 것들은 제외
+            # Build the option list for Group 2 by excluding items already selected in Group 1 and Group 3
             remaining_for_group2 = [
                 k for k in all_Verband
                 if (k not in st.session_state['group1'])
@@ -203,7 +203,7 @@ def main():
             # Select Group2
             Grp_2 = st.multiselect('Regionen für Gruppe 1 auswählen', remaining_for_group2, key='group2')
 
-            # 방금 바뀐 Group_2 기준으로 Group_3에서 겹치는 값 제거
+            # Remove items from Group 3 that are now selected in Group 2
             st.session_state['group3'] = [
                 k for k in st.session_state['group3']
                 if k not in st.session_state['group2']
@@ -228,7 +228,7 @@ def main():
 
             # Group3 Settings
             st.write('Regionseinstellungen - Gruppe 3')
-            # Group_3의 선택지는 Group_1, Group_2에 이미 들어간 것들은 제외
+            # Build the option list for Group 3 by excluding items already selected in Group 1 and Group 2
             remaining_for_group3 = [
                 k for k in all_Verband
                 if (k not in st.session_state['group1'])
@@ -308,58 +308,58 @@ def main():
 
 
 
-    # ------(이하, 데이터프레임 가공과정 : 가정 데이터)------
+    # ------(DataFrame preprocessing for Haushalt data)------
 
-    # I. Bev_for_Vis_df 만들기 - (인구 데이터프레임)
+    # I. create Bev_for_Vis_df - (DataFrame : Bevölkerung)
 
-    # 1. temp_pred_Bev_df 가공
+    # 1. temp_pred_Bev_df - Step1
     temp_pred_Bev_base_df = temp_pred_Bev_base(BW_pred_Bev_df, Grp_1, Grp_2, Grp_3, EW_inc_rate, Grp_val_0)
 
     temp_pred_Bev_Grp_df = temp_pred_Bev_Grp(BW_pred_Bev_df, groups, group_vals, ew_inc_rates)
 
     temp_pred_Bev_df = temp_pred_Bev(temp_pred_Bev_base_df, temp_pred_Bev_Grp_df)
 
-    # 2. temp_act_Bev_df 가공
+    # 2. temp_act_Bev_df - Step2
     temp_act_Bev_df = temp_act_Bev(BW_Bev_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
 
-    # 3. temp_middle_Bev_df 가공
+    # 3. temp_middle_Bev_df - Step3
     temp_middle_Bev_df = temp_middle_Bev(temp_act_Bev_df)
 
-    # 4. Bev_for_Vis_df 만들기
+    # 4. create Bev_for_Vis_df
     Bev_for_Vis_df = Bev_for_Vis(temp_pred_Bev_df, temp_middle_Bev_df, temp_act_Bev_df)
 
 
-    # II. HausEV_for_Vis_df 만들기 - (가정 소비전력 데이터프레임(그래프 시각화용))
+    # II. create HausEV_for_Vis_df - (DataFrame : HaushaltEV (HausEV) for Visualization)
 
-    # 1. frame_pred_HausEV_df 만들기
+    # 1. create frame_pred_HausEV_df
     frame_pred_HausEV_df = frame_pred_HausEV()
 
-    # 2. temp_pred_HausEV_df 가공
+    # 2. temp_pred_HausEV_df
     temp_pred_HausEV_df = temp_pred_HausEV_1(frame_pred_HausEV_df, TBD_df)
 
     temp_pred_HausEV_df = temp_pred_HausEV_2(temp_pred_HausEV_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
 
     temp_pred_HausEV_df = temp_pred_HausEV_3(temp_pred_HausEV_df, Bev_for_Vis_df, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0, EW_GJ_1, EW_GJ_2, EW_GJ_3, EW_GJ)
 
-    # 3. temp_act_HausEV_df 만들기
+    # 3. create temp_act_HausEV_df
     temp_act_HausEV_df = temp_act_HausEV(BW_HausEV_Kreis_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
 
-    # 4. temp_middle_HausEV_df 만들기
+    # 4. create temp_middle_HausEV_df
     temp_middle_HausEV_df = temp_middle_HausEV(temp_act_HausEV_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
 
-    # 5. HausEV_for_Vis_df 만들기
+    # 5. create HausEV_for_Vis_df
     HausEV_for_Vis_df = HausEV_for_Vis(temp_act_HausEV_df, temp_middle_HausEV_df, temp_pred_HausEV_df)
 
 
-    # III. HausEV_for_Vismap_df 만들기
+    # III. create HausEV_for_Vismap_df
 
     HausEV_for_Vismap_df = HausEV_for_Vismap(HausEV_for_Vis_df)
 
 
 
-    # ------(이하, 데이터프레임 가공과정 : 산업 데이터)------
+    # ------(DataFrame preprocessing for Industrie data)------
 
-    # I. empl_for_Vis_df 만들기
+    # I. create empl_for_Vis_df
 
     pred_Bev_for_empl_df = pred_Bev_for_empl(Bev_for_Vis_df, TBD_df, pred_empl_r_df, Grp_1, Grp_2, Grp_3, empl_r_inc_1, empl_r_inc_2, empl_r_inc_3, empl_r_inc)
     act_Bev_for_empl_df = act_Bev_for_empl(BW_Industrie_df, groups, group_vals, Grp_val_0)
@@ -367,7 +367,7 @@ def main():
     empl_for_Vis_df = empl_for_Vis(act_Bev_for_empl_df, middle_Bev_for_empl_df, pred_Bev_for_empl_df)
 
 
-    # II. Umsatz_for_Vis_df 만들기
+    # II. create Umsatz_for_Vis_df
     temp_pred_Umsatz_base_df = temp_pred_Umsatz_base(BW_pred_Umsatz_df, Grp_1, Grp_2, Grp_3, Grp_val_0, umsatz_inc)
     temp_pred_Umsatz_Grp_df = temp_pred_Umsatz_Grp(BW_pred_Umsatz_df, groups, group_vals, umsatz_inc_rates)
     temp_pred_Umsatz_df = temp_pred_Umsatz(temp_pred_Umsatz_base_df, temp_pred_Umsatz_Grp_df)
@@ -376,42 +376,36 @@ def main():
     Umsatz_for_Vis_df = Umsatz_for_Vis(temp_act_Umsatz_df, temp_middle_Umsatz_df, temp_pred_Umsatz_df)
 
 
-    # III. fut_Invest_df 만들기
+    # III. create fut_Invest_df
     temp_2023_Invest_df = temp_2023_Invest(BW_Invest_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
     temp_fut_Invest_df = temp_fut_Invest_1(TBD_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
     temp_fut_Invest_df = temp_fut_Invest_2(temp_fut_Invest_df, temp_2023_Invest_df, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0, invest_inc_1, invest_inc_2, invest_inc_3, invest_inc)
     fut_Invest_df = fut_Invest(temp_2023_Invest_df, temp_fut_Invest_df)
     
 
-    # ------(이하 스케일링 및 예측)------
+    # ------(for Visualization)------
 
-    # I. IndustEV_for_Vismap_df 만들기
+    # I. create IndustEV_for_Vismap_df
     temp_pred_empl_for_Vis_df = temp_pred_empl_for_Vis(empl_for_Vis_df)
     temp_pred_Umsatz_for_Vis_df = temp_pred_Umsatz_for_Vis(Umsatz_for_Vis_df)
     IndustEV_for_Vismap_df = IndustEV_for_Vismap(temp_pred_empl_for_Vis_df, temp_pred_Umsatz_for_Vis_df, fut_Invest_df)
     IndustEV_for_Vismap_df = scal_pred_IndustEV_for_Vismap(IndustEV_for_Vismap_df, normal_reg_scaler, special_reg_scaler, normal_ridge_model, Alb_model, Boeblingen_model, Mannheim_model, Ortenaukreis_model, Rastatt_model, Stuttgart_model, Waldshut_model, Karlsruhe_model)
 
-    # II. IndustEV_for_Graph_df 만들기
+    # II. for IndustEV_for_Graph_df
     temp_act_IndEV_df = temp_act_IndEV(BW_IndustEV_df, Grp_1, Grp_2, Grp_3, Grp_val_1, Grp_val_2, Grp_val_3, Grp_val_0)
     temp_middle_IndEV_df = temp_middle_IndEV(temp_act_IndEV_df)
     temp_pred_IndEV_df = temp_pred_IndEV(IndustEV_for_Vismap_df)
     IndustEV_for_Graph_df = IndustEV_for_Graph(temp_act_IndEV_df, temp_middle_IndEV_df, temp_pred_IndEV_df)
 
 
-    # 산업 소비전력 지도시각화용 : IndustEV_for_Map_df
+    # IndustEV_for_Map_df : for IndustEV-Visualization
     IndustEV_for_Map_df = IndustEV_for_Map(IndustEV_for_Graph_df)
 
 
-    # 종합 소비전력 지도 시각화용 gdf : BW_Summe_Vis_gdf
+    # BW_Summe_Vis_gdf - sum HausEV and IndustEV for Visualization (gdf)
     Summe_df = Summe(HausEV_for_Vismap_df, IndustEV_for_Map_df)
     BW_Summe_Vis_gdf = BW_Summe_Vis(BW_gdf, Summe_df)
 
-
-
-
-    # 삭제한 데이터프레임 및 함수 정리
-    # 데이터프레임 : BW_Bev_Vis_gdf, BW_IndustEV_Vis_gdf
-    # 함수 : BW_Bev_Vis, BW_IndustEV_Vis, to_numeric_cols : 요것은 가정 gdf 데이터타입 변경인데, BW_Summe_Vis_gdf 에서 이미 관련코드가 있어서 더 필요 없음.
 
 
     # Add maps in main_cols[1]
@@ -453,34 +447,34 @@ def main():
     with col1:
         with st.container(border=True):
             st.header('Region 1')
-            # 그래프용 지역 선택1
+            # select options 1 : Kreis
             var_reg_1 = st.selectbox('Wählen Sie bitte einen Kreis aus', TBD_df['DN_DT'].unique(), key='var_reg_1')
 
-            # 인구 시각화1
+            # Visualization (Region 1) : Bevölkerung
             fig_Bev_1 = make_Bev_fig(Bev_for_Vis_df, var_reg_1)
             st.plotly_chart(fig_Bev_1, key='fig_Bev_1')
 
             st.divider()
 
-            # 가정 전기 시각화1
+            # Visualization (Region 1) : HausEV
             fig_HausEV_1 = make_HausEV_fig(HausEV_for_Vis_df, var_reg_1)
             st.plotly_chart(fig_HausEV_1, key='fig_HausEV_1')
 
             st.divider()
 
-            # 산업 직원수 시각화1
+            # Visualization (Region 1) : Beschäftigte
             fig_empl_1 = make_empl_fig(empl_for_Vis_df, var_reg_1)
             st.plotly_chart(fig_empl_1, key='fig_empl_1')
 
             st.divider()
 
-            # 산업 매출 시각화1
+            # Visualization (Region 1) : Gesamtumsatz
             fig_umsatz_1 = make_umsatz_fig(Umsatz_for_Vis_df, var_reg_1)
             st.plotly_chart(fig_umsatz_1, key='fig_umsatz_1')
 
             st.divider()
 
-            # 산업 소비전력 시각화1
+            # Visualization (Region 1) : IndustEV
             fig_IndustEV_1 = make_IndustEV_fig(IndustEV_for_Graph_df, var_reg_1)
             st.plotly_chart(fig_IndustEV_1, key='fig_IndustEV_1')
 
@@ -490,34 +484,34 @@ def main():
     with col2:
         with st.container(border=True):
             st.header('Region 2')
-            # 그래프용 지역 선택2
+            # select options 2 : Kreis
             var_reg_2 = st.selectbox('Wählen Sie bitte einen Kreis aus', TBD_df['DN_DT'].unique(), key='var_reg_2')
 
-            # 인구 시각화2
+            # Visualization (Region 2) : Bevölkerung
             fig_Bev_2 = make_Bev_fig(Bev_for_Vis_df, var_reg_2)
             st.plotly_chart(fig_Bev_2, key='fig_Bev_2')
 
             st.divider()
 
-            # 가정 전기 시각화2
+            # Visualization (Region 2) : HausEV
             fig_HausEV_2 = make_HausEV_fig(HausEV_for_Vis_df, var_reg_2)
             st.plotly_chart(fig_HausEV_2, key='fig_HausEV_2')
 
             st.divider()
 
-            # 산업 직원수 시각화2
+            # Visualization (Region 2) : Beschäftigte
             fig_empl_2 = make_empl_fig(empl_for_Vis_df, var_reg_2)
             st.plotly_chart(fig_empl_2, key='fig_empl_2')
 
             st.divider()
 
-            # 산업 매출 시각화2
+            # Visualization (Region 2) : Gesamtumsatz
             fig_umsatz_2 = make_umsatz_fig(Umsatz_for_Vis_df, var_reg_2)
             st.plotly_chart(fig_umsatz_2, key='fig_umsatz_2')
 
             st.divider()
 
-            # 산업 소비전력 시각화2
+            # Visualization (Region 2) : IndustEV
             fig_IndustEV_2 = make_IndustEV_fig(IndustEV_for_Graph_df, var_reg_2)
             st.plotly_chart(fig_IndustEV_2, key='fig_IndustEV_2')
 

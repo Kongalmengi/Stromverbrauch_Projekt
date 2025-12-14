@@ -12,7 +12,7 @@ from utils.load_files import load_BW_District, make_TBD_df, load_BW_Combined_df,
 from utils.load_files import load_scaler, load_Ridge_model, load_LinearRegression
 
 # Demo_funcs
-from utils.Demo_funcs import divide_Jahr, Gopp_corr_umsatz_dfs, Gopp_corr_bes_dfs, umsatz_corr_dfs_for_Vis, bes_corr_dfs_for_Vis, colormaps_for_Vis, make_subset, make_pred_subset, make_subset_2, make_corr_mat, make_vif, test_gesamtmodell, kfold_result
+from utils.Demo_funcs import divide_Jahr, Gopp_corr_umsatz_dfs, Gopp_corr_bes_dfs, umsatz_corr_dfs_for_Vis, bes_corr_dfs_for_Vis, colormaps_for_Vis, make_subset, make_pred_subset, make_subset_2, make_corr_mat, make_vif, test_gesamtmodell, kfold_result, groupby_IndustEV, kreis_eval
 
 # model eveluations
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -118,23 +118,25 @@ with main_tabs[0]:
 
         st.space(size='small')
 
-        st.markdown(
-            """
-            i) Identifizieren Sie die Abschnitte, in denen im Merkmal Y von Region A fehlende Werte auftreten.
+        explain_box_1 = st.container(border=True)
+        with explain_box_1:
+            st.markdown(
+                """
+                i) Identifizieren Sie die Abschnitte, in denen im Merkmal Y von Region A fehlende Werte auftreten.
 
-            ii) Um potenzielle Vergleichsregionen zu finden, filtern Sie zunächst jene Regionen heraus, deren Verlauf im selben Merkmal Y grundsätzlich mit dem von Region A vergleichbar ist.
+                ii) Um potenzielle Vergleichsregionen zu finden, filtern Sie zunächst jene Regionen heraus, deren Verlauf im selben Merkmal Y grundsätzlich mit dem von Region A vergleichbar ist.
 
-            iii) Da allein das Merkmal Y nicht ausreicht, um die Ähnlichkeit der Regionen zuverlässig zu beurteilen, wird ein zusätzliches, vollständig verfügbares Hilfsmerkmal X ausgewählt.
+                iii) Da allein das Merkmal Y nicht ausreicht, um die Ähnlichkeit der Regionen zuverlässig zu beurteilen, wird ein zusätzliches, vollständig verfügbares Hilfsmerkmal X ausgewählt.
 
-            iv) Vergleichen Sie die zeitlichen Verläufe des Merkmals X der Kandidatenregionen mit dem von Region A und wählen Sie jene Region B aus, deren Muster am ähnlichsten ist.
+                iv) Vergleichen Sie die zeitlichen Verläufe des Merkmals X der Kandidatenregionen mit dem von Region A und wählen Sie jene Region B aus, deren Muster am ähnlichsten ist.
 
-            v) Unter der Annahme, dass die Ähnlichkeit im Hilfsmerkmal X auf vergleichbare strukturelle Bedingungen und Veränderungsmuster hinweist, wird der Verlauf des Merkmals Y von Region B genutzt, um die fehlenden Werte von Region A zu ergänzen.
+                v) Unter der Annahme, dass die Ähnlichkeit im Hilfsmerkmal X auf vergleichbare strukturelle Bedingungen und Veränderungsmuster hinweist, wird der Verlauf des Merkmals Y von Region B genutzt, um die fehlenden Werte von Region A zu ergänzen.
 
-            vi) Um Unterschiede in Skalen oder Größenordnungen zwischen den Regionen zu berücksichtigen, werden die Merkmale standardisiert (Scaling). Anschließend wird die Beziehung zwischen beiden Regionen mittels linearer Regression modelliert, um die fehlenden Werte im Merkmal Y zu schätzen.
+                vi) Um Unterschiede in Skalen oder Größenordnungen zwischen den Regionen zu berücksichtigen, werden die Merkmale standardisiert (Scaling). Anschließend wird die Beziehung zwischen beiden Regionen mittels linearer Regression modelliert, um die fehlenden Werte im Merkmal Y zu schätzen.
 
 
-            """
-        )
+                """
+            )
 
         st.space(size='small')
 
@@ -199,13 +201,15 @@ with main_tabs[0]:
 
         st.space(size='small')
 
-        st.markdown(
-            """
-            **(a) Ab dem Jahr 2006 besteht zwischen Industrieumsatz und Beschäftigtenzahl überwiegend ein proportionaler Zusammenhang.**
+        explain_box_2 = st.container(border=True)
+        with explain_box_2:
+            st.markdown(
+                """
+                **(a) Ab dem Jahr 2006 besteht zwischen Industrieumsatz und Beschäftigtenzahl überwiegend ein proportionaler Zusammenhang.**
 
-            **(b) Vor 2005 zeigt die Beziehung zwischen Industrieumsatz und Beschäftigtenzahl im Vergleich zu der Zeit nach 2006 deutlich stärkere Schwankungen.**
-            """
-        )
+                **(b) Vor 2005 zeigt die Beziehung zwischen Industrieumsatz und Beschäftigtenzahl im Vergleich zu der Zeit nach 2006 deutlich stärkere Schwankungen.**
+                """
+            )
 
         st.space(size='small')
 
@@ -758,7 +762,14 @@ with main_tabs[0]:
         vif_df = make_vif(combined_df)
         container_for_table1 = st.container(border=True, horizontal_alignment='center', vertical_alignment='center')
         with container_for_table1:
-            st.write('Table1. VIF')
+            st.markdown(
+                """
+                <div style="text-align:center;">
+                    Table1. VIF
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
             st.dataframe(vif_df, width=300, hide_index=True)
 
         st.space(size='small')
@@ -1019,146 +1030,392 @@ with main_tabs[1]:
             In diesem Tab können die wichtigsten Bewertungskennzahlen des Gesamtmodells eingesehen werden.
 
             Für das Gesamtmodell wurde ein Ridge-Modell verwendet, wobei ein Alpha-Wert von 10 angewendet wurde.
+
+            Bitte wählen Sie unten einen der Tabs aus.
             """
         )
 
         st.space(size='small')
 
+
+        sub_tabs_c = st.tabs(['i) Modellgütemaße', 'ii) Feature-Importance', 'iii) Residuenverteilung 1', 'iv) Residuenverteilung 2', 'v) Verteilung von Ist- und Prognosewerten'])
 
         # evalution for Visualization
-        y_test, y_pred, residuals, importance_df, eval_results_df, res_df = test_gesamtmodell(combined_df, scaler_for_normal_reg, normal_ridge_model)
+        normal_combined_df, y_test, y_pred, residuals, importance_df, eval_results_df, res_df = test_gesamtmodell(combined_df, scaler_for_normal_reg, normal_ridge_model)
 
-
-        st.markdown(
-            """
-            #### i) Modellgütemaße
-            """
-        )
-
-        st.space(size='small')
-
-        # Evaluations of the Model
-        r2_gesamtmodell = r2_score(y_test, y_pred)
-        mae_gesamtmodell = mean_absolute_error(y_test, y_pred)
-        rmse_gesamtmodell = np.sqrt(mean_squared_error(y_test, y_pred))
-
-        # Evaluation DataFrame
-
-        container_for_gesamteval = st.container(border=True, horizontal_alignment='center', vertical_alignment='center')
-        with container_for_gesamteval:
-            st.write('Table1. Modellgütemaße')
-            # DataFrame of the Evaluations
-            eval_score_df = pd.DataFrame(
-                {
-                    'Maß':['R²', 'MAE', 'RMSE', 'alpha'],
-                    'Wert':[r2_gesamtmodell, mae_gesamtmodell, rmse_gesamtmodell, 10]
-                }
+        with sub_tabs_c[0]:
+            st.markdown(
+                """
+                #### i) Modellgütemaße
+                """
             )
 
-            st.dataframe(eval_score_df, width=300, hide_index=True)
+            st.space(size='small')
 
-        st.space(size='small')
+            st.markdown(
+                """
+                Das Gesamtmodell wird auf 36 von insgesamt 44 Kreisen in Baden-Württemberg angewendet.
 
-        st.markdown(
-            """
-            #### ii) Feature-Importance
-            """
-        )
+                Die betroffenen Kreise sind in Table 1 aufgeführt.
+                """
+            )
 
-        st.space(size='small')
+            st.space(size='small')
 
-        # Visualization
-        fig_importance = px.bar(
-            importance_df,
-            x='feature',
-            y='importance',
-            title='fig1. Ridge Regression Feature Importance (Coefficient Magnitude)',
-            text='importance'
-        )
+            container_for_gesamtkreis = st.container(border=True, horizontal_alignment='center', vertical_alignment='center')
+            with container_for_gesamtkreis:
+                st.markdown(
+                    """
+                    <div style="text-align:center;">
+                        Table1. Kreise mit Anwendung des Gesamtmodells
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-        st.plotly_chart(fig_importance)
+                st.space(size='small')
 
-        st.space(size='small')
+                normal_combined_df_for_dn = normal_combined_df[['DN_DT', 'Regionalverband']].copy()
+                normal_combined_df_for_dn = normal_combined_df_for_dn.rename(columns={'DN_DT':'Kreis'})
+                normal_combined_df_for_dn = normal_combined_df_for_dn.drop_duplicates().reset_index(drop=True)
 
-        st.markdown(
-            """
-            ### iii) Residuenverteilung von Prognose- und Istwerten - Histogramm
-            """
-        )
+                st.dataframe(normal_combined_df_for_dn, height=270)
 
-        st.space(size='small')
+                st.space(size='small')
 
-        fig_res_his = px.histogram(
-            x=residuals,
-            nbins=30,
-            title='fig2. Residual Distribution',
-            labels={'x': 'Residual'},
-        )
+                st.write(f'Anzahl der Kreise, auf die das Gesamtmodell angewendet wird : {len(normal_combined_df_for_dn['Kreis'])}')
 
-        fig_res_his.add_vline(x=0, line_width=2, line_dash='dash', line_color='red')
 
-        st.plotly_chart(fig_res_his)
+            st.space(size='small')
 
-        st.space(size='small')
+            st.markdown(
+                """
+                Die Bewertung des Gesamtmodells auf Basis der Testdaten ist in Table 2 dargestellt.
+                """
+            )
 
-        st.markdown(
-            """
-            ### iv) Residuenverteilung von Prognose- und Istwerten - Streudiagramm
-            """
-        )
+            st.space(size='small')
 
-        st.space(size='small')
+            # Evaluations of the Model
+            r2_gesamtmodell = r2_score(y_test, y_pred)
+            mae_gesamtmodell = mean_absolute_error(y_test, y_pred)
+            rmse_gesamtmodell = np.sqrt(mean_squared_error(y_test, y_pred))
 
-        fig_res_scatt = px.scatter(
-            res_df,
-            x='Predicted',
-            y='Residual',
-            title='fig3. Residual Plot (Predicted vs Residual)',
-        )
+            # Evaluation DataFrame
 
-        fig_res_scatt.add_hline(y=0, line_width=2, line_dash="dash", line_color="red")
+            container_for_gesamteval = st.container(border=True, horizontal_alignment='center', vertical_alignment='center')
+            with container_for_gesamteval:
+                st.markdown(
+                    """
+                    <div style="text-align:center;">
+                        Table2. Modellgütemaße
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                # DataFrame of the Evaluations
+                eval_score_df = pd.DataFrame(
+                    {
+                        'Maß':['R²', 'MAE', 'RMSE', 'alpha', 'Mean Target Value(y)', 'Std. Target Value(y)'],
+                        'Wert':[r2_gesamtmodell, mae_gesamtmodell, rmse_gesamtmodell, 10, y_test.mean(), y_test.std()]
+                    }
+                )
 
-        st.plotly_chart(fig_res_scatt)
+                st.dataframe(eval_score_df, width=300, hide_index=True)
 
-        st.space(size='small')
+            st.space(size='small')
 
-        st.markdown(
-            """
-            ### v) Verteilung von Ist- und Prognosewerten - Streudiagramm
-            """
-        )
+            st.markdown(
+                """
+                Anhand von Table 2 lassen sich die zentralen Bewertungskennzahlen des Modells (im Folgenden Gesamtmodell) erkennen, insbesondere R², MAE und RMSE.
 
-        st.space(size='small')
+                Die alleinige Betrachtung dieser Kennzahlen ist jedoch nicht ausreichend, um die Modellleistung vollständig zu beurteilen.
 
-        # scatter-object for Visualization
-        fig_test_pred_scatt = go.Figure()
+                Insbesondere ist eine detaillierte Analyse der Prognosefehler erforderlich. Dabei sind zwei zentrale Aspekte zu berücksichtigen:
+                """
+            )
 
-        # scatter-object trace
-        fig_test_pred_scatt.add_trace(go.Scatter(
-            x=y_test,
-            y=y_pred,
-            mode='markers',
-            name='Actual vs Predicted'
-        ))
+            st.space(size='small')
 
-        # y = x line
-        fig_test_pred_scatt.add_trace(go.Scatter(
-            x=y_test,
-            y=y_test,
-            mode='lines',
-            name='Ideal Fit',
-            line=dict(dash='dash', color='red')
-        ))
+            st.markdown(
+                """
+                - **Punkt 1: Wie groß ist der Fehler im Verhältnis zur Skala der zugrunde liegenden Daten?**
 
-        fig_test_pred_scatt.update_layout(
-            title='fig4. Actual vs Predicted Scatter Plot',
-            xaxis_title='Actual',
-            yaxis_title='Predicted',
-            width=700,
-            height=500
-        )
+                - **Punkt 2: Wie groß ist der Fehler im Vergleich zur natürlichen Variabilität der Daten?**
+                """
+            )
 
-        st.plotly_chart(fig_test_pred_scatt)
+            st.space(size='small')
+
+            st.markdown(
+                """
+                Zur Beantwortung dieser Fragestellungen wurden die folgenden relativen Kennzahlen definiert:
+                """
+            )
+
+            st.space(size='small')
+
+            container_for_kennzahl = st.container(border=True, horizontal_alignment='center', vertical_alignment='center')
+            with container_for_kennzahl:
+                st.markdown(
+                    """
+                    <div style="text-align:center;">
+                        Kennzahl1. MAE relativ zum Mittelwert
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                # MAE/Mean
+                st.latex(r"""
+                    \frac{MAE}{\bar{y}}
+                    """)
+
+                st.space(size='small')
+
+                st.markdown(
+                    """
+                    <div style="text-align:center;">
+                        Kennzahl2. RMSE relativ zur Standardabweichung
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # MAE/Mean
+                st.latex(r"""
+                    \frac{RMSE}{\sigma_y}
+                    """)
+            
+            st.space(size='small')
+
+            st.markdown(
+                """
+                Zusätzlich sind in Table 2 der Mittelwert sowie die Standardabweichung der Zielvariable (Target Value y) angegeben.
+
+                ### :warning: Wichtiger Hinweis
+
+                An dieser Stelle ergibt sich jedoch ein zentrales Problem.
+
+                Die in Table 2 dargestellten Mittelwerte und Standardabweichungen beziehen sich auf den aggregierten industriellen Stromverbrauch aller Kreise, auf die das Gesamtmodell angewendet wird.
+
+                Dadurch lassen sich Unterschiede in der Verbrauchsgröße zwischen einzelnen Kreisen nicht erfassen.
+
+                Tatsächlich zeigen sich erhebliche Unterschiede im industriellen Stromverbrauch zwischen den Kreisen, wie in fig 1 dargestellt.
+                """
+            )
+
+            st.space(size='small')
+
+            groupby_IndustEV_df = groupby_IndustEV(normal_combined_df)
+
+            groupby_IndustEV_df.index.name = 'Kreis'
+
+            fig_groupby_IndustEV = px.bar(groupby_IndustEV_df, x=groupby_IndustEV_df.index, y='Stromverbrauch(Industrie)', height=500, title='fig1. Vergleich des durchschnittlichen industriellen Stromverbrauchs nach Kreis')
+            st.plotly_chart(fig_groupby_IndustEV)
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                Werden die Kennzahlen ohne Berücksichtigung dieser Größenunterschiede analysiert, kann dies zu einer verzerrten Bewertung der Modellleistung führen.
+
+                Aus diesem Grund ist es erforderlich, die beiden zuvor definierten Kennzahlen kreisweise zu betrachten, um Verzerrungen durch unterschiedliche Verbrauchsgrößen zu vermeiden.
+
+                Die Ergebnisse der kreisweisen Auswertung der Kennzahlen sind in Table 3 dargestellt.
+                """
+            )
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                <div style="text-align:center;">
+                    Table3. Kreisweise Bewertung der Kennzahlen
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            df_all_results = kreis_eval(normal_combined_df, y_test, scaler_for_normal_reg, normal_ridge_model)
+
+            st.dataframe(df_all_results)
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                In Table 3 sind für jeden Kreis sowohl Kennzahl 1 (MAE / Mean_y) als auch Kennzahl 2 (RMSE / Std_y) aufgeführt.
+
+                Besondere Aufmerksamkeit verdient hierbei Kennzahl 2, da diese den Prognosefehler in Relation zur natürlichen Variabilität der Daten setzt.
+
+                Im Fall von Baden-Baden erreicht dieser Wert einen Größenordnungsbereich von etwa 17.
+
+                Dies weist darauf hin, dass das Gesamtmodell für Baden-Baden keine verlässlichen Vorhersagen liefert.
+
+                Darüber hinaus existieren weitere Kreise mit vergleichsweise hohen Werten von Kennzahl 2.
+
+                Auch für diese Kreise ist die Anwendung des Gesamtmodells zur Prognose des industriellen Stromverbrauchs nur eingeschränkt geeignet.
+                """
+            )
+
+            st.divider()
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                #### :seedling: Verbesserungsansätze des Prognosemodells
+
+                Im Tab [1. Auswahl der Modellierungsstrategie] dieser Projekt-Übersichtsseite wurden die Prognosemodelle grundsätzlich in zwei Kategorien unterteilt:
+                """
+            )
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                **- Gesamtmodell**
+
+                **- Regionale Modelle**
+                """
+            )
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                Das Gesamtmodell wird für die Prognose des industriellen Stromverbrauchs auf 36 von insgesamt 44 Kreisen in Baden-Württemberg angewendet.
+
+                Die Ergebnisse aus Table 3 zeigen jedoch, dass für bestimmte Kreise mit hohen Werten von [RMSE / Std_y] die Prognoseleistung des Gesamtmodells nicht ausreichend ist.
+
+                Dies deutet darauf hin, dass für diese Kreise ein separater, regionsspezifischer Modellierungsansatz erforderlich ist, der lokale Besonderheiten besser berücksichtigt.
+                """
+            )
+
+            st.space(size='small')
+
+            st.markdown(
+                """
+                Zur Lösung dieses Problems ist es zunächst notwendig, die Einteilung der Kreise erneut zu überprüfen.
+
+                Werden Kreise mit ähnlichen Merkmalen - beispielsweise hinsichtlich industrieller Struktur, Bevölkerungsgröße oder Beschäftigungscharakteristika - zu gemeinsamen Gruppen zusammengefasst, kann innerhalb dieser Gruppen ein Prognosemodell konsistentere Muster erlernen.
+
+                Auf diese Weise lässt sich eine deutliche Verbesserung der Modellleistung erwarten.
+                """
+            )
+
+            st.space(size='small')
+
+            container_for_hinweis_4 = st.container(border=True)
+            with container_for_hinweis_4:
+                st.markdown(
+                    """
+                    #### :exclamation: Hinweis :exclamation:
+
+                    Die Verbesserung der Modellleistung durch eine Cluster-basierte Gruppierung der Kreise ist als Teil eines zukünftigen Updates geplant und wird in der aktuellen Version noch nicht umgesetzt.
+                    """
+                )
+
+
+
+        with sub_tabs_c[1]:
+            st.markdown(
+                """
+                #### ii) Feature-Importance
+                """
+            )
+
+            st.space(size='small')
+
+            # Visualization
+            fig_importance = px.bar(
+                importance_df,
+                x='feature',
+                y='importance',
+                title='fig1. Ridge Regression Feature Importance (Coefficient Magnitude)',
+                text='importance'
+            )
+
+            st.plotly_chart(fig_importance)
+
+        with sub_tabs_c[2]:
+            st.markdown(
+                """
+                ### iii) Residuenverteilung von Prognose- und Istwerten 1 : Histogramm
+                """
+            )
+
+            st.space(size='small')
+
+            fig_res_his = px.histogram(
+                x=residuals,
+                nbins=30,
+                title='fig1. Residual Distribution',
+                labels={'x': 'Residual'},
+            )
+
+            fig_res_his.add_vline(x=0, line_width=2, line_dash='dash', line_color='red')
+
+            st.plotly_chart(fig_res_his)
+
+        with sub_tabs_c[3]:
+            st.markdown(
+                """
+                ### iv) Residuenverteilung von Prognose- und Istwerten 2 : Streudiagramm
+                """
+            )
+
+            st.space(size='small')
+
+            fig_res_scatt = px.scatter(
+                res_df,
+                x='Predicted',
+                y='Residual',
+                title='fig1. Residual Plot (Predicted vs Residual)',
+            )
+
+            fig_res_scatt.add_hline(y=0, line_width=2, line_dash="dash", line_color="red")
+
+            st.plotly_chart(fig_res_scatt)
+
+        with sub_tabs_c[4]:
+            st.markdown(
+                """
+                ### v) Verteilung von Ist- und Prognosewerten - Streudiagramm
+                """
+            )
+
+            st.space(size='small')
+
+            # scatter-object for Visualization
+            fig_test_pred_scatt = go.Figure()
+
+            # scatter-object trace
+            fig_test_pred_scatt.add_trace(go.Scatter(
+                x=y_test,
+                y=y_pred,
+                mode='markers',
+                name='Actual vs Predicted'
+            ))
+
+            # y = x line
+            fig_test_pred_scatt.add_trace(go.Scatter(
+                x=y_test,
+                y=y_test,
+                mode='lines',
+                name='Ideal Fit',
+                line=dict(dash='dash', color='red')
+            ))
+
+            fig_test_pred_scatt.update_layout(
+                title='fig1. Actual vs Predicted Scatter Plot',
+                xaxis_title='Actual',
+                yaxis_title='Predicted',
+                width=700,
+                height=500
+            )
+
+            st.plotly_chart(fig_test_pred_scatt)
 
 
     with sub_tabs_b[2]:

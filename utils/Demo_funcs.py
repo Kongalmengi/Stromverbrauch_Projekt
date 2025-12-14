@@ -341,7 +341,7 @@ def test_gesamtmodell(combined_df, scaler_for_normal_reg, model):
         'Residual': residuals
     })
 
-    return y_test, y_pred, residuals, importance_df, eval_results_df, res_df
+    return normal_combined_df, y_test, y_pred, residuals, importance_df, eval_results_df, res_df
 
 
 def kfold_result(combined_df, scaler_for_special_reg):
@@ -417,3 +417,52 @@ def kfold_result(combined_df, scaler_for_special_reg):
     result_for_s_model_df = pd.concat(result_for_s_model_dict.values(), axis=0).reset_index(drop=True)
 
     return result_for_s_model_df
+
+
+# for IndustEV scale Visualization
+def groupby_IndustEV(normal_combined_df):
+    grouped_normal_combined = normal_combined_df.groupby('DN_DT')
+    groupby_IndustEV_series = grouped_normal_combined['Stromverbrauch(Industrie)'].mean()
+    groupby_IndustEV_df = pd.DataFrame(groupby_IndustEV_series)
+    return groupby_IndustEV_df
+
+
+# Kreis Evaluation : Gesamtmodell
+def kreis_eval(normal_combined_df, y_test, scaler_for_normal_reg, model):
+    sample_test_df = normal_combined_df.loc[y_test.index]
+    sampled_results = []
+
+    for kreis in sample_test_df['DN_DT'].unique():
+        sampled_y_test = sample_test_df.loc[sample_test_df['DN_DT']==kreis, 'Stromverbrauch(Industrie)']
+        sampled_X_test = sample_test_df.loc[sample_test_df['DN_DT']==kreis].drop(columns=['DN_DT', 'Jahr', 'Regionalverband', 'Bevölkerung insgesamt', 'Betriebe', 'Stromverbrauch(Industrie)', 'Stromverbrauch(Haushalt)', 'Beschäftigungsquote'])
+
+        # 예측을 위한 스케일링 : scaler_for_normal_reg 이용.
+        sampled_X_test_scaled = scaler_for_normal_reg.transform(sampled_X_test)
+
+        # 모델을 이용한 예측 : 모델명 : model
+        sampled_y_pred = model.predict(sampled_X_test_scaled)
+
+        # 평가 : 지역별 MAE와 RMSE
+        sampled_mae = mean_absolute_error(sampled_y_test, sampled_y_pred)
+        sampled_rmse = np.sqrt(mean_squared_error(sampled_y_test, sampled_y_pred))
+
+        # 지역별 MAE/평균, RMAE/표준편차 구하기
+        # 관련지역 전체 산업 소비전력의 평균과 표준편차 구하기
+        # 평균
+        sampled_mean_y = normal_combined_df.loc[normal_combined_df['DN_DT']==kreis, 'Stromverbrauch(Industrie)'].mean()
+        # 표준편차
+        sampled_std_y = normal_combined_df.loc[normal_combined_df['DN_DT']==kreis, 'Stromverbrauch(Industrie)'].std()
+
+        sampled_results.append({
+            'Kreis': kreis,
+            'MAE': sampled_mae,
+            'RMSE': sampled_rmse,
+            'Mean_y': sampled_mean_y,
+            'Std_y': sampled_std_y,
+            'MAE/Mean_y': sampled_mae/sampled_mean_y,
+            'RMSE/Std_y': sampled_rmse/sampled_std_y
+        })
+
+    df_all_results = pd.DataFrame(sampled_results)
+
+    return df_all_results
