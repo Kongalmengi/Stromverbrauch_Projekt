@@ -53,19 +53,23 @@ with st.expander('Projektziel'):
 with st.expander('Projektstruktur und Aufgabenbereiche'):
     st.markdown(
         """
-        #### 1. Projektkonzeption (Verantwortlich : Junho Song)
+        #### 1. Projektkonzeption
+        (Verantwortlich : Junho Song)
         - Entwicklung der Projektidee und Definition der Projektziele
         - Planung der Gesamtstruktur und des Vorgehens
 
-        #### 2. Datenvorverarbeitung und Feature Engineering (Verantwortlich : Junho Song)
+        #### 2. Datenvorverarbeitung und Feature Engineering
+        (Verantwortlich : Junho Song)
         - Datensammlung und Datenbereinigung
         - Strategie zur Behandlung fehlender Werte : Nutzung realer regionaler Modelle zur Ableitung plausibler Muster
 
-        #### 3. Datenanalyse und Explorative Datenanalyse (Verantwortlich : Junho Song)
+        #### 3. Datenanalyse und Explorative Datenanalyse
+        (Verantwortlich : Junho Song)
         - Analyse regionaler Datenmuster
         - Untersuchung von Multikollinearität zwischen Features
 
-        #### 4. Modellierung und Evaluation (Verantwortlich : Junho Song)
+        #### 4. Modellierung und Evaluation
+        (Verantwortlich : Junho Song)
         - Entwicklung einer Modellierungsstrategie auf Basis der EDA-Ergebnisse : Trennung in Gesamtmodell und regionale Modelle
         - Konzeption einer mehrstufigen Evaluationsstrategie
 
@@ -84,11 +88,13 @@ with st.expander('Projektstruktur und Aufgabenbereiche'):
                 ii) RMSE/Standardabweichung
         - Analyse der Modellgrenzen sowie Ableitung von Verbesserungspotenzialen auf Basis der Evaluationsergebnisse
 
-        #### 5. Visualisierung von Ergebnissen und Geodaten (Verantwortlich : Junho Song)
+        #### 5. Visualisierung von Ergebnissen und Geodaten
+        (Verantwortlich : Junho Song)
         - Visualisierung zentraler Analyse- und Vergleichsergebnisse
         - Kartendarstellung auf Kreisebene in Baden-Württemberg mithilfe von Plotly
 
-        #### 6. App-Entwicklung und Deployment (Verantwortlich : Junho Song)
+        #### 6. App-Entwicklung und Deployment
+        (Verantwortlich : Junho Song)
         - Entwicklung und Bereitstellung einer webbasierten Anwendung auf Basis von Streamlit
         """
     )
