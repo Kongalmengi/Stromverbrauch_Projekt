@@ -939,6 +939,8 @@ with main_tabs[1]:
         """
     )
 
+    st.space(size='small')
+
     sub_tabs_b = st.tabs(['1.Auswahl der Modellierungsstrategie', '2.Bewertung des Gesamtmodells', '3.Bewertung der regionalen Modelle'])
 
     with sub_tabs_b[0]:
