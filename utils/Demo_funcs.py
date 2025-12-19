@@ -436,21 +436,20 @@ def kreis_eval(normal_combined_df, y_test, scaler_for_normal_reg, model):
         sampled_y_test = sample_test_df.loc[sample_test_df['DN_DT']==kreis, 'Stromverbrauch(Industrie)']
         sampled_X_test = sample_test_df.loc[sample_test_df['DN_DT']==kreis].drop(columns=['DN_DT', 'Jahr', 'Regionalverband', 'Bevölkerung insgesamt', 'Betriebe', 'Stromverbrauch(Industrie)', 'Stromverbrauch(Haushalt)', 'Beschäftigungsquote'])
 
-        # 예측을 위한 스케일링 : scaler_for_normal_reg 이용.
+        # scaling for prediction : scaler_for_normal_reg
         sampled_X_test_scaled = scaler_for_normal_reg.transform(sampled_X_test)
 
-        # 모델을 이용한 예측 : 모델명 : model
+        # prediction
         sampled_y_pred = model.predict(sampled_X_test_scaled)
 
-        # 평가 : 지역별 MAE와 RMSE
+        # evaluation : MAE and RMSE
         sampled_mae = mean_absolute_error(sampled_y_test, sampled_y_pred)
         sampled_rmse = np.sqrt(mean_squared_error(sampled_y_test, sampled_y_pred))
 
-        # 지역별 MAE/평균, RMAE/표준편차 구하기
-        # 관련지역 전체 산업 소비전력의 평균과 표준편차 구하기
-        # 평균
+
+        # mean
         sampled_mean_y = normal_combined_df.loc[normal_combined_df['DN_DT']==kreis, 'Stromverbrauch(Industrie)'].mean()
-        # 표준편차
+        # Std
         sampled_std_y = normal_combined_df.loc[normal_combined_df['DN_DT']==kreis, 'Stromverbrauch(Industrie)'].std()
 
         sampled_results.append({
